@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 const db = require('./config/db');
 
 const userRoutes = require('./routes/userRoutes');
+const journalRoutes = require('./routes/journalRoutes');
+//const auth = require('./middleware/auth');
 
 dotenv.config();
 
@@ -23,6 +25,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/users', userRoutes);
+app.use('/api/journal', journalRoutes);
 
 app.get('/', (req, res) => {
   res.send('Vaimse tervise päeviku API töötab!')
