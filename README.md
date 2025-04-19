@@ -1,4 +1,4 @@
-# Vaimse tervise päevik (VTPäevik)
+# Vaimse tervise päevik (vtpaevik)
 
 Veebirakendus igapäevase enesetunde, meeleolu ja vaimse heaolu jälgimiseks.
 
@@ -25,8 +25,9 @@ VTPäevik on rakendus, mis võimaldab kasutajatel igapäevaselt jälgida ja salv
 * Chart.js (visualiseerimiseks)
 
 ### Backend
-* Java
-* Spring Boot
+* Node.js
+* Express.js
+* Sequelize ORM
 * REST API (dokumenteeritud Swagger/OpenAPI abil)
 
 ### Andmebaas
