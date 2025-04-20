@@ -1,168 +1,276 @@
-import { useState, useEffect } from 'react';
-import { mockDiaryEntries } from '../data/mockData';
+import React, { useState, useEffect } from 'react';
+import { PlusCircle, Calendar, BarChart2, Heart, X } from 'lucide-react';
 
-export default function DiaryPage() {
-  const [entries, setEntries] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showEntryForm, setShowEntryForm] = useState(false);
-  const [formData, setFormData] = useState({
-    mood: 5,
-    sleep: 5,
-    notes: ''
-  });
+// Main App component that manages the entire application
+const App = () => {
+  return (
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* Navigation bar */}
+      <nav className="w-full px-4 py-3 shadow-md bg-teal-500">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <img 
+              src="/api/placeholder/40/40" 
+              alt="Vaimse Tervise Päevik" 
+              className="h-10 w-10 rounded-full"
+            />
+            <h1 className="text-xl font-semibold text-white">Vaimse Tervise Päevik</h1>
+          </div>
+        </div>
+      </nav>
+      
+      <main className="flex-grow">
+        <HomePage />
+      </main>
+      <footer className="bg-gray-800 text-white text-center py-4 text-sm">
+        <p>&copy; {new Date().getFullYear()} Vaimse Tervise Päevik. Kõik õigused kaitstud.</p>
+      </footer>
+    </div>
+  );
+};
 
+// Home page shown after login
+const HomePage = () => {
+  // States
+  const [entries, setEntries] = useState([
+    // Sample data for visualization
+    { date: '2025-04-15', mood: 4, notes: 'Täna oli hea päev!' },
+    { date: '2025-04-16', mood: 3, notes: 'Keskmine päev.' },
+    { date: '2025-04-17', mood: 5, notes: 'Väga hea päev!' },
+    { date: '2025-04-18', mood: 2, notes: 'Raske päev.' },
+    { date: '2025-04-19', mood: 4, notes: 'Jälle parem.' }
+  ]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTodayEntered, setIsTodayEntered] = useState(false);
+  const [selectedMood, setSelectedMood] = useState(3);
+  const [notes, setNotes] = useState('');
+  
+  // Check for today's entry
   useEffect(() => {
-    const loadEntries = async () => {
-      try {
-        // Simuleerime API päringut
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Järjestame sissekanded kuupäeva järgi, uuemad eespool
-        const sortedEntries = [...mockDiaryEntries].sort(
-          (a, b) => new Date(b.date) - new Date(a.date)
-        );
-        
-        setEntries(sortedEntries);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Viga sissekannete laadimisel:", error);
-        setIsLoading(false);
-      }
+    const checkTodayEntry = () => {
+      const today = new Date().toISOString().split('T')[0];
+      const hasTodayEntry = entries.some(entry => entry.date === today);
+      setIsTodayEntered(hasTodayEntry);
     };
     
-    loadEntries();
-  }, []);
-
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'notes' ? value : Number(value)
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    // Simuleerime uue sissekande lisamist
-    const newEntry = {
-      id: entries.length + 1,
-      date: new Date(),
-      ...formData
-    };
-    
-    setEntries([newEntry, ...entries]);
-    setShowEntryForm(false);
-    setFormData({ mood: 5, sleep: 5, notes: '' });
-  };
-
-  // Abifunktsioon meeleolu kuvamiseks
-  const getMoodEmoji = (mood) => {
-    if (mood >= 8) return '😄';
-    if (mood >= 6) return '🙂';
-    if (mood >= 4) return '😐';
-    if (mood >= 2) return '🙁';
-    return '😢';
+    checkTodayEntry();
+  }, [entries]);
+  
+  // Open modal
+  const openModal = () => {
+    setIsModalOpen(true);
+    setSelectedMood(3);
+    setNotes('');
   };
   
-  // Abifunktsioon une kuvamiseks
-  const getSleepEmoji = (sleep) => {
-    if (sleep >= 8) return '😴';
-    if (sleep >= 6) return '🛌';
-    if (sleep >= 4) return '🥱';
-    return '😫';
+  // Close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
+  
+  // Save new entry
+  const saveEntry = (e) => {
+    e.preventDefault();
+    const today = new Date().toISOString().split('T')[0];
+    const newEntry = {
+      date: today,
+      mood: selectedMood,
+      notes: notes
+    };
+    
+    // In a real app: API request to save the entry
+    setEntries([...entries, newEntry]);
+    setIsTodayEntered(true);
+    closeModal();
+  };
+  
+  // Navigate to journal page
+  const navigateToJournal = () => {
+    // In a real app: navigation logic
+    console.log("Navigate to journal page");
+  };
+  
+  // Navigate to statistics page
+  const navigateToStats = () => {
+    // In a real app: navigation logic
+    console.log("Navigate to statistics page");
+  };
+  
+  // Navigate to tips page
+  const navigateToTips = () => {
+    // In a real app: navigation logic
+    console.log("Navigate to tips page");
+  };
+  
+  // Main app functions - cards
+  const actionCards = [
+    {
+      id: 'add-entry',
+      title: 'Lisa tänane sissekanne',
+      description: 'Märgi üles oma tänane meeleolu ja tunne',
+      icon: <PlusCircle size={24} className="text-teal-500" />,
+      action: openModal,
+      primary: !isTodayEntered,
+      disabled: isTodayEntered
+    },
+    {
+      id: 'view-journal',
+      title: 'Vaata päevikut',
+      description: 'Sirvi varasemaid sissekandeid',
+      icon: <Calendar size={24} className="text-blue-500" />,
+      action: navigateToJournal
+    },
+    {
+      id: 'view-stats',
+      title: 'Vaata statistikat',
+      description: 'Näe oma meeleolu dünaamikat',
+      icon: <BarChart2 size={24} className="text-purple-500" />,
+      action: navigateToStats
+    },
+    {
+      id: 'tips',
+      title: 'Nipid & Harjutused',
+      description: 'Leia harjutusi meeleolu parandamiseks',
+      icon: <Heart size={24} className="text-red-500" />,
+      action: navigateToTips
+    }
+  ];
 
-  if (isLoading) {
+  // Simple function to render mood chart
+  const renderMoodChart = () => {
+    const lastEntries = [...entries].sort((a, b) => 
+      new Date(a.date) - new Date(b.date)
+    ).slice(-7);
+    
+    const maxHeight = 100;
+    
     return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <p className="text-gray-500">Laadin andmeid...</p>
+      <div className="flex items-end justify-around h-64 w-full">
+        {lastEntries.map((entry, index) => {
+          const height = (entry.mood / 5) * maxHeight;
+          let color;
+          
+          switch(entry.mood) {
+            case 1: color = "bg-red-500"; break;
+            case 2: color = "bg-orange-400"; break;
+            case 3: color = "bg-yellow-400"; break;
+            case 4: color = "bg-green-400"; break;
+            case 5: color = "bg-green-600"; break;
+            default: color = "bg-gray-400";
+          }
+          
+          return (
+            <div key={index} className="flex flex-col items-center">
+              <div 
+                className={`w-12 rounded-t-lg ${color}`} 
+                style={{ height: `${height}%` }}
+              ></div>
+              <div className="text-xs mt-2">{new Date(entry.date).toLocaleDateString('et-EE', { month: 'short', day: 'numeric' })}</div>
+            </div>
+          );
+        })}
       </div>
     );
-  }
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Minu päevik</h1>
-        <button 
-          onClick={() => setShowEntryForm(true)}
-          className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition"
-        >
-          Lisa uus sissekanne
-        </button>
+    <div className="container mx-auto p-4 max-w-6xl">
+      {/* Greeting */}
+      <div className="bg-gradient-to-r from-teal-500 to-blue-500 text-white rounded-lg p-6 mb-6 shadow-md">
+        <h1 className="text-2xl font-bold mb-2">Tere tulemast, Kasutaja!</h1>
+        <p>
+          {isTodayEntered
+            ? 'Täname, et märkisid tänase enesetunde! Vaata allpool ülevaadet oma meeleolust.'
+            : 'Kuidas sa end täna tunned? Märgi oma tänane meeleolu, et jälgida oma heaolu.'}
+        </p>
       </div>
-
-      {/* Uue sissekande vorm */}
-      {showEntryForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-semibold mb-4">Uus sissekanne</h2>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Kuidas hindad oma tänast meeleolu? (1-10)
+      
+      {/* Action cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {actionCards.map((card) => (
+          <div 
+            key={card.id}
+            className={`
+              bg-white rounded-lg shadow-md p-4 transition cursor-pointer
+              ${card.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg transform hover:-translate-y-1'}
+              ${card.primary ? 'ring-2 ring-teal-500' : ''}
+            `}
+            onClick={card.disabled ? undefined : card.action}
+          >
+            <div className="flex items-start mb-2">
+              {card.icon}
+              <h2 className="text-lg font-semibold ml-2">{card.title}</h2>
+            </div>
+            <p className="text-gray-600">{card.description}</p>
+            {card.disabled && (
+              <div className="mt-2 text-sm text-teal-600">
+                Juba märgitud täna
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      
+      {/* Dashboard mini-view */}
+      <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">Meeleolu ülevaade</h2>
+        {entries.length > 0 ? (
+          renderMoodChart()
+        ) : (
+          <div className="h-64 flex items-center justify-center">
+            <p className="text-gray-500">Pole veel sissekandeid</p>
+          </div>
+        )}
+      </div>
+      
+      {/* Entry modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
+            <div className="flex justify-between items-center p-4 border-b">
+              <h2 className="text-lg font-semibold">Tänane sissekanne</h2>
+              <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
+                <X size={24} />
+              </button>
+            </div>
+            {/* Entry form content */}
+            <form onSubmit={saveEntry} className="p-4">
+              <div className="mb-4">
+                <label className="block text-gray-700 font-medium mb-2">
+                  Kuidas end täna tundsid?
                 </label>
-                <div className="flex items-center">
-                  <input
-                    type="range"
-                    name="mood"
-                    min="1"
-                    max="10"
-                    value={formData.mood}
-                    onChange={handleFormChange}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <span className="ml-3 text-2xl">{getMoodEmoji(formData.mood)}</span>
-                  <span className="ml-2">{formData.mood}</span>
+                <div className="flex justify-between">
+                  {['😢', '😔', '😐', '🙂', '😄'].map((emoji, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      className={`flex flex-col items-center p-2 rounded-lg transition 
+                        ${selectedMood === index + 1 ? 'bg-teal-100 ring-2 ring-teal-500' : 'hover:bg-gray-100'}`}
+                      onClick={() => setSelectedMood(index + 1)}
+                    >
+                      <span className="text-3xl mb-1">{emoji}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Milline oli su unekvaliteet? (1-10)
-                </label>
-                <div className="flex items-center">
-                  <input
-                    type="range"
-                    name="sleep"
-                    min="1"
-                    max="10"
-                    value={formData.sleep}
-                    onChange={handleFormChange}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <span className="ml-3 text-2xl">{getSleepEmoji(formData.sleep)}</span>
-                  <span className="ml-2">{formData.sleep}</span>
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tänased mõtted
+              <div className="mb-4">
+                <label className="block text-gray-700 font-medium mb-2">
+                  Märkmed (soovi korral)
                 </label>
                 <textarea
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleFormChange}
-                  rows="4"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary"
-                  placeholder="Kirjuta siia oma mõtted, tunded või päeva tähelepanekud..."
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  rows={4}
+                  placeholder="Kirjuta siia oma päevast, mõtetest või tunnetest..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
                 ></textarea>
               </div>
               
-              <div className="flex justify-end space-x-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowEntryForm(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  Tühista
-                </button>
+              <div className="flex justify-end">
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
+                  className="bg-teal-500 hover:bg-teal-600 text-white py-2 px-6 rounded-lg transition"
                 >
                   Salvesta
                 </button>
@@ -171,47 +279,8 @@ export default function DiaryPage() {
           </div>
         </div>
       )}
-
-      {/* Sissekannete nimekiri */}
-      <div className="space-y-4">
-        {entries.length > 0 ? (
-          entries.map(entry => (
-            <div key={entry.id} className="bg-white p-5 rounded-lg shadow-md">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="font-semibold text-lg">
-                  {new Date(entry.date).toLocaleDateString('et-EE', { 
-                    weekday: 'long',
-                    day: 'numeric', 
-                    month: 'long',
-                    year: 'numeric'
-                  })}
-                </h3>
-                <div className="flex space-x-4">
-                  <div className="flex items-center" title="Meeleolu">
-                    <span className="text-2xl mr-1">{getMoodEmoji(entry.mood)}</span>
-                    <span className="text-sm text-gray-600">{entry.mood}/10</span>
-                  </div>
-                  <div className="flex items-center" title="Uni">
-                    <span className="text-2xl mr-1">{getSleepEmoji(entry.sleep)}</span>
-                    <span className="text-sm text-gray-600">{entry.sleep}/10</span>
-                  </div>
-                </div>
-              </div>
-              <p className="text-gray-700">{entry.notes}</p>
-            </div>
-          ))
-        ) : (
-          <div className="bg-white p-6 rounded-lg shadow text-center">
-            <p className="text-gray-500">Sissekandeid pole veel tehtud.</p>
-            <button 
-              onClick={() => setShowEntryForm(true)}
-              className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition"
-            >
-              Lisa esimene sissekanne
-            </button>
-          </div>
-        )}
-      </div>
     </div>
   );
-}
+};
+
+export default App;
