@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { mockDiaryEntries } from '../data/mockData';
+import JournalEntryModal from '../components/journal/JournalEntryModal';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [todayEntry, setTodayEntry] = useState(null);
   const [recentEntries, setRecentEntries] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -86,7 +88,7 @@ export default function Dashboard() {
         ) : (
           <div className="bg-primary-light bg-opacity-20 p-4 rounded-md">
             <p className="font-medium">Sa pole veel tänast päeva kirja pannud</p>
-            <button className="mt-3 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition">
+            <button onClick={() => setShowModal(true)} className="mt-3 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition">
               Lisa tänane sissekanne
             </button>
           </div>
@@ -122,7 +124,7 @@ export default function Dashboard() {
         ) : (
           <p className="text-gray-500">Sissekandeid pole veel tehtud.</p>
         )}
-      </div>
+      </div>{showModal && <JournalEntryModal isOpen={showModal} onClose={() => setShowModal(false)} />}
     </div>
   );
 }
