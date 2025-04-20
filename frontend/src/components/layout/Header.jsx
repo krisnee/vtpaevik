@@ -1,15 +1,14 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
+  // Ajutiselt eemaldame useAuth kasutamise
+  const user = null; // Eeldame et kasutaja pole sisselogitud
+  
   const handleLogout = () => {
-    logout();
-    navigate('/login');
+    // Ajutiselt tühi funktsioon
+    console.log('Väljalogimine (mittefunktsionaalne)');
   };
 
   return (
