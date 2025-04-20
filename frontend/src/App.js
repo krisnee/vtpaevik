@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import styled from 'styled-components';
+import './App.css';
 
 // Komponendid
 import Header from './components/layout/Header';
@@ -15,31 +15,66 @@ import NotFound from './components/layout/NotFound';
 // Kontekst
 import { AuthProvider } from './context/AuthContext';
 
-const AppContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: #f5f5f5;
-`;
+// PrivateRoute komponent, mis kontrollib autentimist
+const PrivateRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
 
-const MainContent = styled.main`
-  flex: 1;
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-`;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="p-4">Laadimine...</div>
+      </div>
+    );
+  }
+  
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
+
+// Konteksti kasutamise hook
+const useAuth = () => {
+  // Ajutine näidisimplementatsioon
+  return {
+    isAuthenticated: false, // Muuda tõeseks, kui kasutaja on autenditud
+    loading: false
+  };
+};
+
+// Avaleht komponent
+const Home = () => {
+  return (
+    <div className="bg-white rounded-lg shadow p-6 max-w-2xl mx-auto">
+      <h2 className="text-xl font-semibold mb-4">Tere tulemast!</h2>
+      <p className="text-gray-700">
+        See on sinu vaimse tervise päevik. Siin saad jälgida oma meeleolu, 
+        und ja igapäevaseid mõtteid, et paremini oma heaolu mõista.
+      </p>
+      
+      <div className="mt-6 p-4 bg-primary bg-opacity-10 rounded-md">
+        <p className="font-medium">
+          Rakendus on arendamisel. Peagi lisanduvad funktsioonid:
+        </p>
+        <ul className="list-disc pl-5 mt-2 space-y-1">
+          <li>Kasutaja registreerimine ja sisselogimine</li>
+          <li>Päeviku sissekannete lisamine</li>
+          <li>Meeleolu ja une jälgimine</li>
+          <li>Statistika ja visuaalsed graafikud</li>
+        </ul>
+      </div>
+    </div>
+  );
+};
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <AppContainer>
+        <div className="app-container min-h-screen bg-gray-50">
           <Header />
-          <MainContent>
+          <main className="app-main">
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/home" element={<Home />} />
               <Route 
                 path="/dashboard" 
                 element={
@@ -64,38 +99,15 @@ function App() {
                   </PrivateRoute>
                 } 
               />
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<Navigate to="/home" replace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </MainContent>
+          </main>
           <Footer />
-        </AppContainer>
+        </div>
       </Router>
     </AuthProvider>
   );
 }
-
-// PrivateRoute komponent, mis kontrollib autentimist
-const PrivateRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth(); // Eeldame, et kasutad AuthContext'i
-
-  if (loading) {
-    return <div>Laadimine...</div>;
-  }
-  
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
-};
-
-// Konteksti kasutamise hook (võid luua eraldi failis)
-const useAuth = () => {
-  // Siin võiks kasutada useContext konteksti saamiseks
-  // Näiteks: const context = useContext(AuthContext);
-  
-  // Ajutine näidisimplementatsioon
-  return {
-    isAuthenticated: false, // Muuda tõeseks, kui kasutaja on autenditud
-    loading: false
-  };
-};
 
 export default App;
