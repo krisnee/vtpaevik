@@ -1,19 +1,57 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../context/AuthContext'; // NB! Muudetud teie failistruktuurile vastavaks
 
 export default function Register() {
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    passwordConfirm: ''
+  });
+  const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { register: registerUser, error: authError } = useAuth();
   const navigate = useNavigate();
 
-  const password = watch('password', '');
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
-  const onSubmit = async (data) => {
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.name || formData.name.length < 2) {
+      newErrors.name = 'Nimi peab olema vähemalt 2 märki pikk';
+    }
+    
+    if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Palun sisesta korrektne e-posti aadress';
+    }
+    
+    if (!formData.password || formData.password.length < 6) {
+      newErrors.password = 'Parool peab olema vähemalt 6 märki pikk';
+    }
+    
+    if (formData.password !== formData.passwordConfirm) {
+      newErrors.passwordConfirm = 'Paroolid ei ühti';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+    
     setIsSubmitting(true);
-    const success = await registerUser(data.name, data.email, data.password);
+    const success = await registerUser(formData.name, formData.email, formData.password);
     setIsSubmitting(false);
     
     if (success) {
@@ -43,7 +81,7 @@ export default function Register() {
             </div>
           )}
 
-          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                 Nimi
@@ -51,18 +89,87 @@ export default function Register() {
               <div className="mt-1">
                 <input
                   id="name"
+                  name="name"
                   type="text"
-                  {...register('name', { 
-                    required: 'Nimi on kohustuslik',
-                    minLength: {
-                      value: 2,
-                      message: 'Nimi peab olema vähemalt 2 märki pikk'
-                    }
-                  })}
+                  value={formData.name}
+                  onChange={handleChange}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary"
                 />
                 {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                  <p className="mt-1 text-sm text-red-600">{errors.name}</p>
                 )}
               </div>
             </div>
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                E-posti aadress
+              </label>
+              <div className="mt-1">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary"
+                />
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Parool
+              </label>
+              <div className="mt-1">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary"
+                />
+                {errors.password && (
+                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="passwordConfirm" className="block text-sm font-medium text-gray-700">
+                Kinnita parool
+              </label>
+              <div className="mt-1">
+                <input
+                  id="passwordConfirm"
+                  name="passwordConfirm"
+                  type="password"
+                  value={formData.passwordConfirm}
+                  onChange={handleChange}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary"
+                />
+                {errors.passwordConfirm && (
+                  <p className="mt-1 text-sm text-red-600">{errors.passwordConfirm}</p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              >
+                {isSubmitting ? 'Registreerimine...' : 'Registreeru'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
