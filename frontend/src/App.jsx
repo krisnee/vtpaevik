@@ -12,10 +12,9 @@ import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 
 // Uued komponendid
-import LandingPage from './components/home/LandingPage';
-import JournalEntryModal from './components/journal/JournalEntryModal'; 
-import JournalForm from './components/journal/JournalForm';
-import StatisticsView from './components/stats/StatisticsView';
+import LandingPage from './pages/LandingPage';
+import JournalEntryModal from './components/journal/JournalEntryModal';
+import StatsPage from './pages/StatsPage';
 import Dashboard from './pages/Dashboard';
 
 // Kontekst
@@ -49,7 +48,7 @@ function App() {
     <AuthProvider>
       <Router>
         <div className="app-container min-h-screen bg-gray-50">
-          <Header />
+        <Header />
           <main className="app-main">
             <Routes>
               <Route path="/login" element={<Login />} />
@@ -64,11 +63,10 @@ function App() {
                 } 
               />
               <Route 
-                path="/diary" 
+                path="/journal" 
                 element={
                   <PrivateRoute>
                     <div>
-                      <JournalForm />
                       <JournalEntryModal />
                     </div>
                   </PrivateRoute>
@@ -78,7 +76,7 @@ function App() {
                 path="/statistics" 
                 element={
                   <PrivateRoute>
-                    <StatisticsView />
+                    <StatsPage />
                   </PrivateRoute>
                 } 
               />
