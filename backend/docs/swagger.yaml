@@ -1,0 +1,472 @@
+openapi: 3.0.0
+info:
+  title: Vaimse Tervise Päevik API
+  description: API dokumentatsioon Vaimse Tervise Päeviku rakendusele
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8081/api
+    description: Arenduskeskkonna server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  schemas:
+    User:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        id:
+          type: integer
+          description: Kasutaja ID
+        username:
+          type: string
+          description: Kasutajanimi
+        email:
+          type: string
+          format: email
+          description: Kasutaja e-post
+        password:
+          type: string
+          format: password
+          description: Kasutaja parool
+        created_at:
+          type: string
+          format: date-time
+      example:
+        username: kasutaja
+        email: kasutaja@näide.ee
+        password: salajaneParool123
+    
+    JournalEntry:
+      type: object
+      required:
+        - user_id
+        - date
+        - mood_rating
+      properties:
+        id:
+          type: integer
+          description: Sissekande ID
+        user_id:
+          type: integer
+          description: Kasutaja ID
+        date:
+          type: string
+          format: date
+          description: Sissekande kuupäev
+        mood_rating:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Meeleolu hinnang (1-10)
+        sleep_quality:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Une kvaliteet (1-10)
+        notes:
+          type: string
+          description: Kasutaja märkmed
+      example:
+        date: "2025-04-21"
+        mood_rating: 8
+        sleep_quality: 7
+        notes: "Täna oli hea päev."
+    
+    MoodStats:
+      type: object
+      properties:
+        avg_mood:
+          type: number
+          description: Keskmine meeleolu hinnang
+        highest_mood:
+          type: number
+          description: Kõrgeim meeleolu hinnang
+        lowest_mood:
+          type: number
+          description: Madalaim meeleolu hinnang
+    
+    SleepStats:
+      type: object
+      properties:
+        avg_sleep:
+          type: number
+          description: Keskmine une kvaliteet
+        highest_sleep:
+          type: number
+          description: Parim une kvaliteet
+        lowest_sleep:
+          type: number
+          description: Halvim une kvaliteet
+    
+    MonthlyStats:
+      type: object
+      properties:
+        avg_mood:
+          type: number
+        avg_sleep:
+          type: number
+        total_entries:
+          type: integer
+
+security:
+  - bearerAuth: []
+
+paths:
+  # Kasutaja otspunktid
+  /users/register:
+    post:
+      tags:
+        - Kasutajad
+      summary: Registreeri uus kasutaja
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - password
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: Kasutaja edukalt loodud
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Vigased andmed või kasutaja juba olemas
+  
+  /users/login:
+    post:
+      tags:
+        - Kasutajad
+      summary: Kasutaja sisselogimine
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Edukas sisselogimine
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Vale e-post või parool
+  
+  /users/me:
+    get:
+      tags:
+        - Kasutajad
+      summary: Päri praeguse kasutaja andmed
+      responses:
+        '200':
+          description: Kasutaja andmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Autentimine ebaõnnestus
+  
+  # Päeviku otspunktid
+  /journal/entries:
+    get:
+      tags:
+        - Päevik
+      summary: Küsi kasutaja päeviku sissekandeid
+      parameters:
+        - in: query
+          name: timeRange
+          schema:
+            type: string
+            enum: [week, month, year, all]
+          description: Ajaperiood, mille kohta andmeid küsitakse
+      responses:
+        '200':
+          description: Päeviku sissekannete nimekiri
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JournalEntry'
+    
+    post:
+      tags:
+        - Päevik
+      summary: Lisa uus päeviku sissekanne
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - date
+                - mood_rating
+              properties:
+                date:
+                  type: string
+                  format: date
+                  example: "2025-04-21"
+                mood_rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                  example: 8
+                sleep_quality:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                  example: 7
+      responses:
+        '201':
+          description: Sissekanne edukalt loodud
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  entry_id:
+                    type: integer
+        '400':
+          description: Vigased sisendandmed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                        message:
+                          type: string
+              example:
+                errors:
+                  - field: mood_rating
+                    message: Meeleolu hinnang peab olema 1-10
+  
+  /journal/entries/{date}:
+    get:
+      tags:
+        - Päevik
+      summary: Päri konkreetse kuupäeva päeviku sissekanne
+      parameters:
+        - in: path
+          name: date
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Sissekande kuupäev (YYYY-MM-DD)
+      responses:
+        '200':
+          description: Päeviku sissekanne
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JournalEntry'
+        '404':
+          description: Sissekannet ei leitud
+    
+    put:
+      tags:
+        - Päevik
+      summary: Uuenda päeviku sissekannet
+      parameters:
+        - in: path
+          name: date
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Sissekande kuupäev (YYYY-MM-DD)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mood_rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                sleep_quality:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Sissekanne edukalt uuendatud
+        '404':
+          description: Sissekannet ei leitud
+    
+    delete:
+      tags:
+        - Päevik
+      summary: Kustuta päeviku sissekanne
+      parameters:
+        - in: path
+          name: date
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Sissekande kuupäev (YYYY-MM-DD)
+      responses:
+        '200':
+          description: Sissekanne edukalt kustutatud
+        '404':
+          description: Sissekannet ei leitud
+  
+  # Statistika otspunktid
+  /stats/mood:
+    get:
+      tags:
+        - Statistika
+      summary: Hangi meeleolu statistika
+      parameters:
+        - in: query
+          name: timeRange
+          schema:
+            type: string
+            enum: [week, month, year, all]
+          description: Ajaperiood, mille kohta statistikat küsitakse
+      responses:
+        '200':
+          description: Meeleolu statistika
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoodStats'
+  
+  /stats/sleep:
+    get:
+      tags:
+        - Statistika
+      summary: Hangi une kvaliteedi statistika
+      parameters:
+        - in: query
+          name: timeRange
+          schema:
+            type: string
+            enum: [week, month, year, all]
+          description: Ajaperiood, mille kohta statistikat küsitakse
+      responses:
+        '200':
+          description: Une kvaliteedi statistika
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SleepStats'
+  
+  /stats/monthly/{year}/{month}:
+    get:
+      tags:
+        - Statistika
+      summary: Hangi kuu kokkuvõte
+      parameters:
+        - in: path
+          name: year
+          required: true
+          schema:
+            type: integer
+          description: Aasta (nt 2025)
+        - in: path
+          name: month
+          required: true
+          schema:
+            type: integer
+          description: Kuu (1-12)
+      responses:
+        '200':
+          description: Kuu statistika
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthlyStats'
+  
+  /stats/trends:
+    get:
+      tags:
+        - Statistika
+      summary: Hangi trendid ja mustrid
+      parameters:
+        - in: query
+          name: timeRange
+          schema:
+            type: string
+            enum: [month, year, all]
+          description: Ajaperiood, mille kohta statistikat küsitakse
+      responses:
+        '200':
+          description: Leitud trendid ja mustrid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  trends:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        description:
+                          type: string
+                        value:
+                          type: number
