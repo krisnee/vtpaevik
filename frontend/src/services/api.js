@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Baas URL meie API jaoks - CRA kasutab process.env muutujaid
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 // Axios instance konfiguratsiooni ja interceptoritega
 const api = axios.create({
