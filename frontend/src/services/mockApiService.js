@@ -1,4 +1,4 @@
-import { mockUser, mockDiaryEntries, mockStatistics } from '../data/mockData';
+import { mockUser, mockJournalEntries, mockStatistics } from '../data/mockData';
 
 // Simuleerime API vastuse viivitust
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -35,14 +35,14 @@ const mockApiService = {
   },
   
   // Päeviku sissekanded
-  getDiaryEntries: async () => {
+  getJournalEntries: async () => {
     await delay(300);
-    return [...mockDiaryEntries];
+    return [...mockJournalEntries];
   },
   
-  getDiaryEntry: async (id) => {
+  getJournalEntry: async (id) => {
     await delay(200);
-    const entry = mockDiaryEntries.find(entry => entry.id === parseInt(id));
+    const entry = mockJournalEntries.find(entry => entry.id === parseInt(id));
     
     if (!entry) {
       throw new Error('Päeviku sissekannet ei leitud');
@@ -51,47 +51,47 @@ const mockApiService = {
     return entry;
   },
   
-  createDiaryEntry: async (entryData) => {
+  createJournalEntry: async (entryData) => {
     await delay(400);
     
     const newEntry = {
-      id: mockDiaryEntries.length + 1,
+      id: mockJournalEntries.length + 1,
       date: new Date(),
       ...entryData
     };
     
-    mockDiaryEntries.push(newEntry);
+    mockJournalEntries.push(newEntry);
     return newEntry;
   },
   
-  updateDiaryEntry: async (id, entryData) => {
+  updateJournalEntry: async (id, entryData) => {
     await delay(400);
     
-    const entryIndex = mockDiaryEntries.findIndex(entry => entry.id === parseInt(id));
+    const entryIndex = mockJournalEntries.findIndex(entry => entry.id === parseInt(id));
     
     if (entryIndex === -1) {
       throw new Error('Päeviku sissekannet ei leitud');
     }
     
     const updatedEntry = {
-      ...mockDiaryEntries[entryIndex],
+      ...mockJournalEntries[entryIndex],
       ...entryData
     };
     
-    mockDiaryEntries[entryIndex] = updatedEntry;
+    mockJournalEntries[entryIndex] = updatedEntry;
     return updatedEntry;
   },
   
-  deleteDiaryEntry: async (id) => {
+  deleteJournalEntry: async (id) => {
     await delay(300);
     
-    const entryIndex = mockDiaryEntries.findIndex(entry => entry.id === parseInt(id));
+    const entryIndex = mockJournalEntries.findIndex(entry => entry.id === parseInt(id));
     
     if (entryIndex === -1) {
       throw new Error('Päeviku sissekannet ei leitud');
     }
     
-    mockDiaryEntries.splice(entryIndex, 1);
+    mockJournalEntries.splice(entryIndex, 1);
     return { success: true };
   },
   

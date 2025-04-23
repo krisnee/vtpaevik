@@ -6,7 +6,7 @@ export const mockUser = {
 };
 
 // Ajutised päeviku sissekanded
-export const mockDiaryEntries = [
+export const mockJournalEntries = [
   {
     id: 1,
     date: new Date('2025-04-18'),
