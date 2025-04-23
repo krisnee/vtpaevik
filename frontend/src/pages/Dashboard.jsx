@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { mockDiaryEntries } from '../data/mockData';
+import { mockJournalEntries } from '../data/mockData';
 import JournalEntryModal from '../components/journal/JournalEntryModal';
 
 export default function Dashboard() {
@@ -18,12 +18,12 @@ export default function Dashboard() {
         
         // Kontrolli, kas täna on juba sissekanne tehtud
         const today = new Date().toDateString();
-        const entry = mockDiaryEntries.find(
+        const entry = mockJournalEntries.find(
           e => new Date(e.date).toDateString() === today
         );
         
         // Viimased 5 sissekannet
-        const recent = [...mockDiaryEntries]
+        const recent = [...mockJournalEntries]
           .sort((a, b) => new Date(b.date) - new Date(a.date))
           .slice(0, 5);
         
