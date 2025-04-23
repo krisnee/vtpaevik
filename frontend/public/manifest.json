@@ -1,5 +1,5 @@
 {
-  "short_name": "Tervise Päevik",
+  "short_name": "VT Päevik",
   "name": "Vaimse Tervise Päevik",
   "icons": [
     {
@@ -20,6 +20,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#5bbfb5",
+  "theme_color": "#6fb5b2",
   "background_color": "#ffffff"
 }
