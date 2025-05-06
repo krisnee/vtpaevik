@@ -20,14 +20,16 @@ const LandingPage = () => {
                   to="/register" 
                   className="px-6 py-3 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors text-lg font-medium shadow-md"
                 >
-                  Alusta tasuta
+                  Alusta tasuta prooviperioodi
                 </Link>
               </div>
             </div>
             <div className="mt-10 lg:mt-0 flex justify-center">
               <img 
-                src="/api/placeholder/500/400" 
-                alt="Vaimse tervise päevik" 
+                src="/images/heart.png"
+                alt="Süda"
+                  width="500px"
+                  height="400px"
                 className="rounded-lg shadow-xl"
               />
             </div>
@@ -112,8 +114,10 @@ const LandingPage = () => {
             </div>
             <div className="relative flex items-center justify-center">
               <img 
-                src="/api/placeholder/640/420" 
-                alt="Dashboard näidis" 
+                src="/images/sitting_rock.png"
+                alt="Mees istub kivil"
+                    width="640px"
+                    height="420px"
                 className="rounded-md shadow m-6"
               />
             </div>
@@ -124,4 +128,4 @@ const LandingPage = () => {
   );
 };
 
-export default LandingPage;
+export default LandingPage; 
