@@ -10,8 +10,10 @@ const App = () => {
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <img 
-              src="/api/placeholder/40/40" 
-              alt="Vaimse Tervise Päevik" 
+              src="https://placehold.co/40x40" 
+              alt="Placeholder"
+                  width="40px"
+                  height="40px"
               className="h-10 w-10 rounded-full"
             />
             <h1 className="text-xl font-semibold text-white">Vaimse Tervise Päevik</h1>

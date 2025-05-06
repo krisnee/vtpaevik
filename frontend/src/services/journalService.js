@@ -1,26 +1,16 @@
 import api from './api';
 
 const journalService = {
-  // Päeviku sissekannete pärimine
+  // Päevikukannete pärimine
   getJournalEntries: async () => {
-    try {
-      const response = await api.get('/journal/entries');
-      return response.data;
-    } catch (error) {
-      console.error('Viga päevikukannete pärimisel:', error);
-      return [];
-    }
+    const response = await api.get('/journal/entries');
+    return response.data;
   },
 
   // Ühe päevikukande pärimine ID järgi
   getJournalEntryById: async (id) => {
-    try {
-      const response = await api.get(`/journal/entries/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error('Viga päevikukande pärimisel:', error);
-      throw error;
-    }
+    const response = await api.get(`/journal/entries/${id}`);
+    return response.data;
   },
 
   // Päevikukande pärimine kuupäeva järgi
@@ -29,29 +19,15 @@ const journalService = {
     return response.data;
   },
 
-  // Uue päeviku sissekande loomine
+  // Uue päeviku sissekande lisamine
   createJournalEntry: async (entryData) => {
-    try {
-      const response = await api.post('/journal/entries', {
-        date: entryData.date,
-        mood_rating: parseInt(entryData.mood),
-        sleep_quality: parseInt(entryData.sleep),
-        notes: entryData.notes
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Viga sissekande loomisel:', error);
-      throw error;
-    }
+    const response = await api.post('/journal/entries', entryData);
+    return response.data;
   },
-  // Päeviku sissekande uuendamine
+
+  // Päevikukande uuendamine
   updateJournalEntry: async (id, entryData) => {
-    const response = await api.put(`/journal/entries/${id}`, {
-      date: entryData.date,
-      mood_rating: parseInt(entryData.mood),
-      sleep_quality: parseInt(entryData.sleep),
-      notes: entryData.notes
-    });
+    const response = await api.put(`/journal/entries/${id}`, entryData);
     return response.data;
   },
 
@@ -84,15 +60,16 @@ const journalService = {
     const today = new Date();
     const year = today.getFullYear();
     const month = today.getMonth() + 1;
-  
-  if (period === 'month') {
-    return await journalService.getMonthlyStats(year, month);
-  } else if (period === 'year') {
-    return await journalService.getYearlyStats(year);
-  } else {
-    const response = await api.get(`/journal/statistics?period=${period}`);
-    return response.data;
+    
+    if (period === 'month') {
+      return await journalService.getMonthlyStats(year, month);
+    } else if (period === 'year') {
+      return await journalService.getYearlyStats(year);
+    } else {
+      const response = await api.get(`/journal/statistics?period=${period}`);
+      return response.data;
+    }
   }
-}};
+};
 
 export default journalService;
