@@ -1,5 +1,6 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const dotenv = require('dotenv');
+const jwt = require('jsonwebtoken');
 
 dotenv.config();
 
@@ -17,23 +18,16 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOSTNAME || 'd129002.mysql.zonevs.eu',
     dialect: 'mariadb',
-    logging: process.env.NODE_ENV === 'development' ? console.log : false, // Logime ainult arenduskeskkonnas
     pool: {
       max: 5, // Maksimaalne ühenduste arv kogumis
       min: 0, // Minimaalne ühenduste arv kogumis
       acquire: 30000, // Maksimaalne aeg millisekundites, mille jooksul saab ühendust enne vea tekkimist hankida
       idle: 10000 // Maksimaalne aeg millisekundites, mille jooksul võib ühendus jõude seista enne vabastamist
     },
-    dialectOptions: {
-      // Kui teie andmebaas nõuab SSL/TLS ühendust
-      ssl: process.env.DB_SSL === 'true' ? {
-        require: true,
-        rejectUnauthorized: false // Arenduskeskkonnas võib olla vajalik
-      } : false
-    },
-    timezone: '+03:00' // Eesti ajavöönd
-  }
+   }
 );
+
+//const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
 // Ühenduse testimine funktsioon
 const connectDB = async () => {
