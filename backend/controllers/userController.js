@@ -55,12 +55,12 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Vale e-post või parool' });
     }
     
-    // Genereeri JWT
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '30d' }
-    );
+    // // Genereeri JWT
+    // const token = jwt.sign(
+    //   { id: user.id, email: user.email },
+    //   process.env.JWT_SECRET,
+    //   { expiresIn: '30d' }
+    // );
     
     res.json({
       message: 'Sisselogimine õnnestus',

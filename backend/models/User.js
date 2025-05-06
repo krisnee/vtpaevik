@@ -10,7 +10,7 @@ const User = db.sequelize.define('User', {
   },
   username: {
     type: DataTypes.STRING(50),
-    allowNull: false,
+    allowNull: false,  // This means username cannot be null
     unique: true
   },
   email: {
