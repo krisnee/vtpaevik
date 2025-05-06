@@ -36,5 +36,5 @@
 }
 .some-class {
   color: rgb(193, 193, 255); /* Õige */
-  background: linear-gradient(0, 0, 0, 0.1); /* Õige */
+  background: linear-gradient(0, 0, 0, 0.3); /* Õige */
 }

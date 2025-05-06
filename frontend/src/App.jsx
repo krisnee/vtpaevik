@@ -1,92 +1,96 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import './App.css';
 import NotFound from './pages/NotFound';
-
 // Layout komponendid
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
-
 // Autentimise komponendid
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
-
 // Uued komponendid
 import LandingPage from './pages/LandingPage';
 import JournalEntryModal from './components/journal/JournalEntryModal';
 import StatsPage from './pages/StatsPage';
 import Dashboard from './pages/Dashboard';
-
 // Kontekst
 import { AuthProvider } from './contexts/AuthContext';
-//import { useAuth } from './contexts/AuthContext';
+import PrivateRoute from './components/PrivateRoute';
 
-// // PrivateRoute komponent, mis kontrollib autentimist
-// const PrivateRoute = ({ children }) => {
-//   const { user, loading } = useAuth();
+// Layout komponent, mis sisaldab Header ja Footer komponente
+const Layout = ({ children }) => (
+  <div className="app-container min-h-screen bg-gray-50">
+    <Header />
+    <main className="app-main">
+      {children}
+    </main>
+    <Footer />
+  </div>
+);
 
-//   if (loading) {
-//     return (
-//       <div className="flex justify-center items-center h-full">
-//         <div className="p-4">Laadimine...</div>
-//       </div>
-//     );
-//   }
-  
-//   return user ? children : <Navigate to="/login" replace />;
-// };
-
-const PrivateRoute = ({ children }) => {
-  // Ajutiselt lubame alati juurdepääsu privaatsetele lehtedele
-  return children;
-}
-
-// Peamine rakenduse komponent
+// Marsruutide defineerimine
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Navigate to="/home" replace />,
+  },
+  {
+    path: "/login",
+    element: <Layout><Login /></Layout>,
+  },
+  {
+    path: "/register",
+    element: <Layout><Register /></Layout>,
+  },
+  {
+    path: "/home",
+    element: <Layout><LandingPage /></Layout>,
+  },
+  {
+    path: "/dashboard",
+    element: (
+      <Layout>
+        <PrivateRoute>
+          <Dashboard />
+        </PrivateRoute>
+      </Layout>
+    ),
+  },
+  {
+    path: "/journal",
+    element: (
+      <Layout>
+        <PrivateRoute>
+          <JournalEntryModal />
+        </PrivateRoute>
+      </Layout>
+    ),
+  },
+  {
+    path: "/statistics",
+    element: (
+      <Layout>
+        <PrivateRoute>
+          <StatsPage />
+        </PrivateRoute>
+      </Layout>
+    ),
+  },
+  {
+    path: "*",
+    element: <Layout><NotFound /></Layout>,
+  }
+], {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true
+  }
+});
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="app-container min-h-screen bg-gray-50">
-        <Header />
-          <main className="app-main">
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/home" element={<LandingPage />} />
-              <Route 
-                path="/dashboard" 
-                element={
-                  <PrivateRoute>
-                    <Dashboard />
-                  </PrivateRoute>
-                } 
-              />
-              <Route 
-                path="/journal" 
-                element={
-                  <PrivateRoute>
-                    <div>
-                      <JournalEntryModal />
-                    </div>
-                  </PrivateRoute>
-                } 
-              />
-              <Route 
-                path="/statistics" 
-                element={
-                  <PrivateRoute>
-                    <StatsPage />
-                  </PrivateRoute>
-                } 
-              />
-              <Route path="/" element={<Navigate to="/home" replace />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </Router>
+      <RouterProvider router={router} />
     </AuthProvider>
   );
 }
