@@ -1,11 +1,11 @@
 openapi: 3.0.0
 info:
-  title: Vaimse Tervise Päevik API
-  description: API dokumentatsioon Vaimse Tervise Päeviku rakendusele
+  title: Vaimse tervise päevik API
+  description: API dokumentatsioon Vaimse tervise päeviku rakendusele
   version: 1.0.0
 
 servers:
-  - url: http://localhost:8080/api
+  - url: http://localhost:8080/api/
     description: Arenduskeskkonna server
 
 components:
@@ -122,12 +122,11 @@ security:
 
 paths:
   # Kasutaja otspunktid
-  /users/register:
+  /auth/register:
     post:
       tags:
-        - Kasutajad
+        - Authentication
       summary: Registreeri uus kasutaja
-      security: []
       requestBody:
         required: true
         content:
@@ -143,31 +142,35 @@ paths:
                   type: string
                 email:
                   type: string
+                  format: email
                 password:
                   type: string
+                  format: password
       responses:
         '201':
-          description: Kasutaja edukalt loodud
+          description: Edukas registreerimine
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message:
-                    type: string
                   token:
                     type: string
                   user:
-                    $ref: '#/components/schemas/User'
-        '400':
-          description: Vigased andmed või kasutaja juba olemas
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      username:
+                        type: string
+                      email:
+                        type: string
   
-  /users/login:
+  /auth/login:
     post:
       tags:
-        - Kasutajad
-      summary: Kasutaja sisselogimine
-      security: []
+        - Authentication
+      summary: Logi sisse
       requestBody:
         required: true
         content:
@@ -180,8 +183,13 @@ paths:
               properties:
                 email:
                   type: string
+                  format: email
                 password:
                   type: string
+                  format: password
+          example:
+            email: "kasutaja@näide.ee"
+            password: "salajaneParool123"
       responses:
         '200':
           description: Edukas sisselogimine
@@ -193,9 +201,20 @@ paths:
                   token:
                     type: string
                   user:
-                    $ref: '#/components/schemas/User'
-        '400':
-          description: Vale e-post või parool
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      username:
+                        type: string
+                      email:
+                        type: string
+            example:
+              token: "string"
+              user:
+                id: 1
+                username: "kasutaja"
+                email: "kasutaja@näide.ee"
   
   /users/me:
     get:
