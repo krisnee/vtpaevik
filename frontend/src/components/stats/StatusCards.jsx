@@ -43,7 +43,7 @@ const StatusCards = ({ data }) => {
       <StatusCard 
         title="Meeleolu" 
         value={averageMood} 
-        max={10} 
+        max={5} 
         color="bg-teal-500" 
         icon={
           <svg className="w-6 h-6 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,7 +54,7 @@ const StatusCards = ({ data }) => {
       <StatusCard 
         title="Uni" 
         value={averageSleep} 
-        max={10} 
+        max={5} 
         color="bg-blue-500" 
         icon={
           <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,7 +65,7 @@ const StatusCards = ({ data }) => {
       <StatusCard 
         title="Aktiivsus" 
         value={averageActivity} 
-        max={10} 
+        max={5} 
         color="bg-yellow-500" 
         icon={
           <svg className="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,7 +76,7 @@ const StatusCards = ({ data }) => {
       <StatusCard 
         title="Sotsiaalne suhtlus" 
         value={averageSocial} 
-        max={10} 
+        max={5} 
         color="bg-pink-500" 
         icon={
           <svg className="w-6 h-6 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
