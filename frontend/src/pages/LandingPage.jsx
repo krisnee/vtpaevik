@@ -26,7 +26,7 @@ const LandingPage = () => {
             </div>
             <div className="mt-10 lg:mt-0 flex justify-center">
               <img 
-                src="/images/heart.png"
+                src="images/heart.png"
                 alt="Süda"
                   width="500px"
                   height="400px"
@@ -114,7 +114,7 @@ const LandingPage = () => {
             </div>
             <div className="relative flex items-center justify-center">
               <img 
-                src="/images/sitting_rock.png"
+                src="images/sitting_rock.png"
                 alt="Mees istub kivil"
                     width="640px"
                     height="420px"
