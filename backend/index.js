@@ -1,64 +1,74 @@
+// IMPORTID
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const bodyParser = require('body-parser');
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
 const db = require('./config/db');
 
+// Marsruutide importimine
+const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const journalRoutes = require('./routes/journalRoutes');
 const entryRoutes = require('./routes/entryRoutes');
-const swaggerUi = require('swagger-ui-express');
-const YAML = require('yamljs');
-const swaggerDocument = YAML.load('./docs/swagger.yaml');
 
+// SEADISTUSED
+// 1. Keskkonna muutujate laadimine .env failist
 dotenv.config();
 
-const app = express();
+// Keskkonna muutujate olemasolu kontroll
+// Logime konsooli, kas kõik vajalikud muutujad on olemas
+console.log('JWT_SECRET olemas:', !!process.env.JWT_SECRET);
+console.log('DB seadistused olemas:', {
+  host: !!process.env.DB_HOSTNAME,
+  user: !!process.env.DB_USERNAME,
+  db: !!process.env.DB_DATANAME,
+  // parooli ei logi turvalisuse huvides
+});
 
-// CORS ja JSON-i tugi
+// Express rakenduse loomine
+const app = express();
+// Swagger dokumentatsiooni laadimine
+const swaggerDocument = YAML.load('./docs/swagger.yaml');
+
+// MIDDLEWARE SEADISTUSED
+// 1. Logimine
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
+  next();
+});
+
+// 2. Päringu keha parsijad
+app.use(express.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// 3. CORS seadistused
 app.use(cors({
-  origin: '*', // Lubame kõik päritolud (arenduskeskkonnas)
+  origin: 'http://localhost:3000',   // origin: '*', // Lubame kõik päritolud (arenduskeskkonnas)
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true // Lisame, kui kasutame küpsiseid
 }));
 
-app.use(express.json());
-
-// // Preflight päringute käsitlemine
-// app.options('*', cors());
-
-// Swaggeri seadistamine
+// 4. Swagger API dokumentatsioon
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+// API MARSRUUDID
 // Põhiteekond
 app.get('/', (req, res) => {
   res.send('Vaimse tervise päeviku API töötab!');
 });
 
-// API teekonnad
-app.use('/api/auth', userRoutes);
-// app.use('/api/auth/register', userRoutes);
-app.use('/api/journal', journalRoutes);
-app.use('/api/entries', entryRoutes);
+// API marsruutide defineerimine
+app.use('/api/auth', authRoutes);        // Autentimisega seotud marsruudid
+app.use('/api/users', userRoutes);       // Kasutajaga seotud marsruudid
+app.use('/api/journal', journalRoutes);  // Päeviku marsruudid
+app.use('/api/entries', entryRoutes);    // Sissekannete marsruudid
 
-app.use('/api/users', (req, res, next) => {
-  console.log('Request URL:', req.originalUrl);
-  next();
-}, userRoutes);
-
-
-app.use((req, res, next) => {
-  console.log(`Request URL: ${req.originalUrl}`);
-  next();
-});
-
-app.use((err, req, res, next) => {
-  console.error('Serveri viga:', err);
-  res.status(500).json({ message: 'Serveri viga' });
-});
-
-
-// Testhambad andmete jaoks, kui puudub päris andmebaas
-// NB! Eemaldada või asendada pärast andmebaasi integratsiooni
+// TESTIMISE ENDPOINT-ID
+// NB! Eemaldada pärast arenduse lõppu
 app.post('/api/test/entries', (req, res) => {
   console.log('Saadud andmed:', req.body);
   res.status(201).json({ 
@@ -68,55 +78,36 @@ app.post('/api/test/entries', (req, res) => {
   });
 });
 
-// app.get('/api/test/entries', (req, res) => {
-//   res.json([
-//     { 
-//       id: 1, 
-//       date: '2023-05-01', 
-//       mood_rating: 8, 
-//       sleep_quality: 7, 
-//       notes: 'Hea päev' 
-//     },
-//     { 
-//       id: 2, 
-//       date: '2023-05-02', 
-//       mood_rating: 6, 
-//       sleep_quality: 5, 
-//       notes: 'Keskmine päev' 
-//     }
-//   ]);
-// });
-
-// 404 käsitleja - peab olema pärast kõiki marsruute
+// VEAKÄSITLEJAD (peavad olema kõige viimasena)
+// 1. 404 käsitleja - tundmatu marsruudi jaoks
 app.use((req, res) => {
   res.status(404).json({ message: 'Lehte ei leitud' });
 });
 
-// Üldine veakäsitleja - peab olema kõige viimane middleware
+// 2. Üldine veakäsitleja
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-    res.status(500).json({
-      message: 'Serveri viga',
-      error: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
+  console.error('Serveri viga:', err);
+  res.status(500).json({
+    message: 'Serveri viga',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
+});
 
-// Serveri käivitamine
+// SERVERI KÄIVITAMINE
 const PORT = process.env.PORT || 8080;
 
 const startServer = async () => {
   try {
-    // Proovime andmebaasiga ühendust luua
+    // Andmebaasiga ühenduse loomine
     await db.connectDB();
     
-    // Sünkroniseerime andmebaasi tabelid (kui kasutad Sequelize'i)
-    // Kommenteeri välja, kui tabeleid pole vaja sünkroniseerida
+    // Andmebaasi tabelite sünkroniseerimine
     await db.syncTables(false, true); // force=false, alter=true
     
+    // Serveri käivitamine
     app.listen(PORT, () => {
       console.log(`Server töötab pordil http://localhost:${PORT}`);
       console.log(`Swagger dokumentatsioon: http://localhost:${PORT}/api-docs`);
-      console.log(`API on kättesaadav: http://localhost:${PORT}/api/auth/register`);
     });
   } catch (error) {
     console.error('Serveri käivitamine ebaõnnestus:', error);
