@@ -1,66 +1,94 @@
+/**
+ * Header.jsx
+ * 
+ * Vaimse tervise päeviku rakenduse peamine navigatsioonipäis.
+ * Võimaldab navigeerida rakenduse lehtede vahel, kasutajakonto haldamist
+ * ja visuaalse teema muutmist.
+ * 
+ * @version 1.0.0
+ * @author [Kristi]
+ * @date Mai 2025
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
+import AuthPopup from '../auth/AuthPopup';
 import { 
   Home, Book, BarChart2, Heart, User, 
   Menu, X, Moon, Sun, PhoneCall, Info
 } from 'lucide-react';
 
+/**
+ * Header komponent rakenduse ülaosa jaoks
+ * Sisaldab navigatsiooni, kasutajaautentimist ja teemavahetust
+ */
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
-  const location = useLocation();
+  // --------- OLEKUD ---------
+  // Põhiolekud menüü ja teema jaoks
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // Mobiilimenüü avatud/suletud olek
+  const [isDarkMode, setIsDarkMode] = useState(false); // Tumeda/heleda režiimi olek
+  
+  // Autentimisega seotud olekud
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Kas kasutaja on sisse logitud
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // Sisselogimise modaal
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false); // Registreerimise modaal
+  
+  const location = useLocation(); // Praegune asukoht rakenduses
 
-  // Funktsioon, mis kontrollib autentimise olekut
+  // --------- EFEKTID ---------
+  // Kontrollib autentimise olekut lehe laadimisel
   useEffect(() => {
-    // Siin kontrollime, kas kasutaja on sisselogitud
+    // Kontrollime, kas kasutaja on sisselogitud (token olemas)
     const token = localStorage.getItem('token');
     if (token) {
       setIsAuthenticated(true);
     }
   }, []);
 
-  // Tumeda/heleda režiimi lülitamise funktsioon
+  // --------- FUNKTSIOONID ---------
+  // Tumeda/heleda režiimi lülitamine
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
-    // Teema lülitamise loogika
+    // Siia võib lisada teema rakendamise loogika, nt:
     // document.documentElement.classList.toggle('dark');
   };
 
-  // Menüü avamise/sulgemise funktsioon
+  // Menüü avamine/sulgemine (mobiilivaates)
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // Modaalide haldamine
+  // Modaalide haldamise funktsioonid
   const openLoginModal = () => {
+    console.log("Sisselogimise modaali avamine");
     setIsLoginModalOpen(true);
     setIsRegisterModalOpen(false);
-    setIsMenuOpen(false);
+    setIsMenuOpen(false); // Sulgeb mobiilimenüü, kui see oli avatud
   };
-
+  
   const openRegisterModal = () => {
+    console.log("Registreerimise modaali avamine");
     setIsRegisterModalOpen(true);
     setIsLoginModalOpen(false);
-    setIsMenuOpen(false);
+    setIsMenuOpen(false); // Sulgeb mobiilimenüü, kui see oli avatud
   };
-
+  
   const closeModals = () => {
+    console.log("Modaalide sulgemine");
     setIsLoginModalOpen(false);
     setIsRegisterModalOpen(false);
   };
 
+  // Väljalogimine
   const handleLogout = () => {
-    // Logi välja loogika
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setIsAuthenticated(false);
-    setIsMenuOpen(false);
+    setIsMenuOpen(false); // Sulgeb mobiilimenüü pärast väljalogimist
   };
 
-  // Menüüelemendid
+  // --------- MENÜÜELEMENDID ---------
+  // Menüüelementide andmed (ikoonid, nimed, lingid)
   const menuItems = [
     { id: 'home', path: '/', name: 'Avaleht', icon: <Home size={20} />, forAll: true },
     { id: 'journal', path: '/journal', name: 'Päevik', icon: <Book size={20} />, forAll: false },
@@ -73,22 +101,24 @@ const Header = () => {
     { id: 'about', path: '/about', name: 'Meist', icon: <Info size={20} />, forAll: true },
   ];
 
-    // Leian elemendid autentimise oleku põhjal
-    const visibleMenuItems = menuItems.filter(item => isAuthenticated || item.forAll);
+  // Filtreerime menüüelemendid autentimise oleku põhjal
+  const visibleMenuItems = menuItems.filter(item => isAuthenticated || item.forAll);
 
-    // Peamenüüs näidatavad elemendid (staatiliselt määratud)
-    const mainMenuItems = [
-      menuItems[0], // Avaleht
-      ...(isAuthenticated ? [menuItems[1], menuItems[2]] : []) // Päevik ja Statistika ainult sisseloginud kasutajatele
-    ];
+  // Peamenüüs näidatavad elemendid
+  const mainMenuItems = [
+    menuItems[0], // Avaleht
+    ...(isAuthenticated ? [menuItems[1], menuItems[2]] : []) // Päevik ja Statistika ainult sisseloginud kasutajatele
+  ];
   
-    // Ülejäänud elemendid drop-down menüüs
-    const dropdownMenuItems = visibleMenuItems.filter(item => !mainMenuItems.includes(item));
-  
-  // Defineerime aktiivsete ja mitteaktiivsete linkide stiilid
+  // "Rohkem" alammenüüs näidatavad elemendid
+  const dropdownMenuItems = visibleMenuItems.filter(item => !mainMenuItems.includes(item));
+
+  // --------- STIILID ---------
+  // Aktiivsete ja mitteaktiivsete linkide stiilid
   const activeStyle = "text-white bg-primary-dark font-medium rounded-md px-3 py-2";
   const inactiveStyle = "text-white hover:bg-primary-dark hover:bg-opacity-70 rounded-md px-3 py-2";
 
+  // --------- RENDERDAMINE ---------
   return (
     <header className="bg-primary shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -100,7 +130,7 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* Desktop navigatsioon */}
+          {/* Desktop navigatsioon - kuvatud ainult laiematel ekraanidel (md:) */}
           <div className="hidden md:flex items-center space-x-2">
             {/* Põhimenüü elemendid */}
             {mainMenuItems.map((item) => (
@@ -148,11 +178,12 @@ const Header = () => {
               <button 
                 onClick={toggleDarkMode} 
                 className="p-2 rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition duration-200 mr-3"
+                aria-label={isDarkMode ? "Lülitu heledasse režiimi" : "Lülitu tumedasse režiimi"}
               >
                 {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
               </button>
 
-              {/* Autentimise nupud */}
+              {/* Autentimise nupud - erinevad sisselogitud/väljalogitud oleku järgi */}
               {isAuthenticated ? (
                 <div className="relative group">
                   <button className="flex items-center text-white hover:bg-primary-dark hover:bg-opacity-70 rounded-md px-3 py-2">
@@ -194,11 +225,14 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Mobiilimenüü nupp */}
+          {/* Mobiilimenüü nupp - kuvatud ainult väiksematel ekraanidel */}
           <div className="md:hidden flex items-center">
             <button
               onClick={toggleMenu}
               className="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-primary-dark focus:outline-none"
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
+              aria-label="Menüü nupp"
             >
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -206,11 +240,11 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobiilimenüü */}
+      {/* Mobiilimenüü - nähtav ainult kui isMenuOpen on true */}
       {isMenuOpen && (
-        <div className="md:hidden border-t border-primary-dark">
+        <div id="mobile-menu" className="md:hidden border-t border-primary-dark">
           <div className="pt-2 pb-3 space-y-1 px-2">
-            {/* Kõik menüüelemendid */}
+            {/* Kõik nähtavad menüüelemendid */}
             {visibleMenuItems.map((item) => (
               <NavLink
                 key={item.id}
@@ -266,157 +300,33 @@ const Header = () => {
         </div>
       )}
 
-      {/* Login Modal */}
+      {/* Sisselogimise modaal */}
       {isLoginModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
-            <button
-              onClick={closeModals}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-            >
-              <X size={24} />
-            </button>
-            
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Logi sisse</h2>
-            
-            <form className="space-y-6">
-              {/* Form fields */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  E-posti aadress
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Parool
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                  required
-                />
-              </div>
-              
-              <div>
-                <button
-                  type="submit"
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                >
-                  Logi sisse
-                </button>
-              </div>
-            </form>
-            
-            <div className="mt-6">
-              <button
-                onClick={() => {
-                  setIsLoginModalOpen(false);
-                  setIsRegisterModalOpen(true);
-                }}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-              >
-                Loo uus konto
-              </button>
-            </div>
-          </div>
-        </div>
+        <AuthPopup 
+          isLoginOpen={true} 
+          isRegisterOpen={false} 
+          onClose={closeModals} 
+          onSwitchToRegister={openRegisterModal} 
+          onSwitchToLogin={openLoginModal} 
+        />
       )}
-
-      {/* Register Modal */}
-      {isRegisterModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
-            <button
-              onClick={closeModals}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-            >
-              <X size={24} />
-            </button>
-            
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Registreeru</h2>
-            
-            <form className="space-y-6">
-              {/* Form fields */}
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                  Nimi
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="register-email" className="block text-sm font-medium text-gray-700">
-                  E-posti aadress
-                </label>
-                <input
-                  type="email"
-                  id="register-email"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="register-password" className="block text-sm font-medium text-gray-700">
-                  Parool
-                </label>
-                <input
-                  type="password"
-                  id="register-password"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="password-confirm" className="block text-sm font-medium text-gray-700">
-                  Kinnita parool
-                </label>
-                <input
-                  type="password"
-                  id="password-confirm"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                  required
-                />
-              </div>
-              
-              <div>
-                <button
-                  type="submit"
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                >
-                  Registreeru
-                </button>
-              </div>
-            </form>
-            
-            <div className="mt-6">
-              <button
-                onClick={() => {
-                  setIsRegisterModalOpen(false);
-                  setIsLoginModalOpen(true);
-                }}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-              >
-                Logi sisse
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+ 
+    {/* Registreerimise modaal */}
+    {isRegisterModalOpen && (
+      <AuthPopup 
+        isLoginOpen={false} 
+        isRegisterOpen={true} 
+        onClose={closeModals} 
+        onSwitchToRegister={() => {
+          setIsLoginModalOpen(false);
+          setIsRegisterModalOpen(true);
+        }} 
+        onSwitchToLogin={() => {
+          setIsRegisterModalOpen(false);
+          setIsLoginModalOpen(true);
+        }} 
+      />
+    )}
     </header>
   );
 };
