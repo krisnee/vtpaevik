@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import journalService from '../../services/journalService'; // Veenduge, et tee on õige
-import ImageWithFallback from '../../components/ImageWithFallback'; 
+import { BookHeart, Smile, Moon, Calendar, MessageCircle, X, Check } from 'lucide-react';
+import journalService from '../../services/journalService';
 
 const JournalComponent = () => {
   // Seisundi muutujad
@@ -9,8 +9,9 @@ const JournalComponent = () => {
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().substr(0, 10),
-    mood: 5,
-    sleep: 5,
+    mood_rating: 3,
+    sleep_quality: 3,
+    social_interaction: 2,
     notes: ''
   });
 
@@ -33,8 +34,9 @@ const JournalComponent = () => {
     setSelectedEntry(null);
     setFormData({
       date: new Date().toISOString().substr(0, 10),
-      mood: 5,
-      sleep: 5,
+      mood_rating: 3,
+      sleep_quality: 3,
+      social_interaction: 2,
       notes: ''
     });
     setIsModalOpen(true);
@@ -45,9 +47,10 @@ const JournalComponent = () => {
     setSelectedEntry(entry);
     setFormData({
       date: new Date(entry.date).toISOString().substr(0, 10),
-      mood: entry.mood,
-      sleep: entry.sleep,
-      notes: entry.notes
+      mood_rating: entry.mood_rating,
+      sleep_quality: entry.sleep_quality,
+      social_interaction: entry.social_interaction || 2,
+      notes: entry.notes || ''
     });
     setIsModalOpen(true);
   };
@@ -95,14 +98,20 @@ const JournalComponent = () => {
 
   // Emoji valik meeleolu jaoks
   const getMoodEmoji = (value) => {
-    const emojis = ['😞', '😔', '😐', '🙂', '😊', '😄', '😁', '🤩', '😍', '🥰'];
-    return emojis[Math.min(parseInt(value) - 1, 9)];
+    const emojis = ['😞', '😕', '😐', '🙂', '😄'];
+    return emojis[Math.min(parseInt(value) - 1, 4)];
   };
 
   // Emoji valik une jaoks
   const getSleepEmoji = (value) => {
-    const emojis = ['😴', '🥱', '😪', '😌', '💤', '🛌', '🌙', '✨', '🌟', '💫'];
-    return emojis[Math.min(parseInt(value) - 1, 9)];
+    const emojis = ['😴', '🥱', '😪', '😌', '💤'];
+    return emojis[Math.min(parseInt(value) - 1, 4)];
+  };
+
+  // Interaktsiooni sõnaliselt väljendamine
+  const getSocialText = (value) => {
+    const options = ["Minimaalne", "Vähe", "Normaalselt", "Palju", "Väga palju"];
+    return options[value] || "Normaalselt";
   };
 
   // Kuupäeva formaatimine
@@ -116,14 +125,17 @@ const JournalComponent = () => {
   };
 
   return (
-    <div className="py-8">
+    <div className="py-8 bg-gray-50 min-h-screen">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Päise osa koos "Lisa uus" nupuga */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Minu päevik</h1>
+          <h1 className="text-3xl font-bold text-purple-800 flex items-center">
+            <BookHeart className="mr-2" />
+            Minu päevik
+          </h1>
           <button
             onClick={handleAddEntry}
-            className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+            className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
           >
             Lisa uus sissekanne
           </button>
@@ -135,7 +147,7 @@ const JournalComponent = () => {
             entries.map((entry) => (
               <div
                 key={entry.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-purple-100"
               >
                 <div className="px-6 py-4">
                   <div className="flex justify-between items-center mb-2">
@@ -144,29 +156,38 @@ const JournalComponent = () => {
                     </h2>
                     <div className="flex space-x-2">
                       <span title="Meeleolu" className="text-2xl">
-                        {getMoodEmoji(entry.mood)}
+                        {getMoodEmoji(entry.mood_rating)}
                       </span>
                       <span title="Uni" className="text-2xl">
-                        {getSleepEmoji(entry.sleep)}
+                        {getSleepEmoji(entry.sleep_quality)}
                       </span>
                     </div>
                   </div>
-                  <div className="flex space-x-4 text-sm text-gray-500 mb-4">
+                  <div className="flex flex-wrap gap-4 text-sm text-gray-500 mb-4">
                     <div className="flex items-center">
+                      <Smile className="mr-1 text-yellow-500" />
                       <span className="mr-1">Meeleolu:</span>
-                      <span className="font-medium">{entry.mood}/10</span>
+                      <span className="font-medium">{entry.mood_rating}/5</span>
                     </div>
                     <div className="flex items-center">
+                      <Moon className="mr-1 text-blue-500" />
                       <span className="mr-1">Uni:</span>
-                      <span className="font-medium">{entry.sleep}/10</span>
+                      <span className="font-medium">{entry.sleep_quality}/5</span>
                     </div>
+                    {entry.social_interaction !== undefined && (
+                      <div className="flex items-center">
+                        <MessageCircle className="mr-1 text-green-500" />
+                        <span className="mr-1">Sotsiaalsus:</span>
+                        <span className="font-medium">{getSocialText(entry.social_interaction)}</span>
+                      </div>
+                    )}
                   </div>
                   <p className="text-gray-700">{entry.notes}</p>
                 </div>
                 <div className="bg-gray-50 px-6 py-3 flex justify-end">
                   <button
                     onClick={() => handleEditEntry(entry)}
-                    className="text-teal-600 hover:text-teal-800 text-sm font-medium"
+                    className="text-purple-600 hover:text-purple-800 text-sm font-medium"
                   >
                     Muuda
                   </button>
@@ -186,7 +207,7 @@ const JournalComponent = () => {
       {/* Hõljuv "Lisa uus" nupp mobiilivaates */}
       <button
         onClick={handleAddEntry}
-        className="md:hidden fixed bottom-6 right-6 bg-teal-600 text-white rounded-full p-4 shadow-lg hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+        className="md:hidden fixed bottom-6 right-6 bg-purple-600 text-white rounded-full p-4 shadow-lg hover:bg-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
       >
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -198,38 +219,53 @@ const JournalComponent = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-xl p-6 mx-4">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold text-gray-800">
+              <h2 className="text-2xl font-semibold text-purple-800 flex items-center">
+                <BookHeart className="mr-2" />
                 {selectedEntry ? 'Muuda sissekannet' : 'Tänane enesetunne'}
               </h2>
               <button onClick={handleCloseModal} className="text-gray-500 hover:text-gray-700">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="w-6 h-6" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Kuupäev */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Kuupäev</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  <Calendar className="mr-2 text-purple-500" /> Kuupäev
+                </label>
                 <input
                   type="date"
                   name="date"
                   value={formData.date}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
                 />
               </div>
 
-              {/* Meeleolu skaala */}
+              {/* Meeleolu valik */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Meeleolu (1-10) {getMoodEmoji(formData.mood)}
+                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                  <Smile className="mr-2 text-yellow-500" /> Meeleolu (1-5)
                 </label>
-                <div className="relative">
+                <div className="mb-2">
+                  <div className="flex justify-between items-center">
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <button 
+                        type="button"
+                        key={value}
+                        onClick={() => setFormData({...formData, mood_rating: value})}
+                        className={`text-3xl ${formData.mood_rating == value ? 'scale-125 border-2 border-purple-500 rounded-full p-1' : 'opacity-50'}`}
+                      >
+                        {getMoodEmoji(value)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="relative mt-4">
                   {/* Numbrid */}
                   <div className="flex justify-between px-[10px] mb-2">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((number) => (
+                    {[1, 2, 3, 4, 5].map((number) => (
                       <span key={number} className="text-xs text-gray-500">
                         {number}
                       </span>
@@ -239,10 +275,10 @@ const JournalComponent = () => {
                   <div className="flex items-center space-x-2">
                     <input
                       type="range"
-                      name="mood"
+                      name="mood_rating"
                       min="1"
-                      max="10"
-                      value={formData.mood}
+                      max="5"
+                      value={formData.mood_rating}
                       onChange={handleChange}
                       className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                     />
@@ -256,13 +292,13 @@ const JournalComponent = () => {
 
               {/* Une kvaliteet */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Une kvaliteet (1-10) {getSleepEmoji(formData.sleep)}
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  <Moon className="mr-2 text-blue-500" /> Une kvaliteet (1-5)
                 </label>
                 <div className="relative">
                   {/* Numbrid */}
                   <div className="flex justify-between px-[10px] mb-2">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((number) => (
+                    {[1, 2, 3, 4, 5].map((number) => (
                       <span key={number} className="text-xs text-gray-500">
                         {number}
                       </span>
@@ -272,10 +308,10 @@ const JournalComponent = () => {
                   <div className="flex items-center space-x-2">
                     <input
                       type="range"
-                      name="sleep"
+                      name="sleep_quality"
                       min="1"
-                      max="10"
-                      value={formData.sleep}
+                      max="5"
+                      value={formData.sleep_quality}
                       onChange={handleChange}
                       className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                     />
@@ -287,10 +323,29 @@ const JournalComponent = () => {
                 </div>
               </div>
 
+              {/* Sotsiaalne suhtlus */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  <MessageCircle className="mr-2 text-green-500" /> Sotsiaalne suhtlus
+                </label>
+                <select 
+                  name="social_interaction"
+                  value={formData.social_interaction}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
+                >
+                  <option value="0">Minimaalne</option>
+                  <option value="1">Vähe</option>
+                  <option value="2">Normaalselt</option>
+                  <option value="3">Palju</option>
+                  <option value="4">Väga palju</option>
+                </select>
+              </div>
+
               {/* Märkmed */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mõtted ja tähelepanekud
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  <MessageCircle className="mr-2 text-purple-500" /> Mõtted ja tähelepanekud
                 </label>
                 <textarea
                   name="notes"
@@ -298,7 +353,7 @@ const JournalComponent = () => {
                   onChange={handleChange}
                   rows="5"
                   placeholder="Kirjuta siia oma tänased mõtted, tunded või kogemused..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
                 ></textarea>
               </div>
 
@@ -307,27 +362,21 @@ const JournalComponent = () => {
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center"
                 >
-                  Tühista
+                  <X className="mr-1 w-4 h-4" /> Tühista
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center"
                 >
-                  Salvesta
+                  <Check className="mr-1 w-4 h-4" /> Salvesta
                 </button>
               </div>
             </form>
           </div>
         </div>
-      )}<ImageWithFallback
-      src="sitting_rock.jpg"
-      alt="Placeholder"
-      width="500px"
-      height="400px"
-      className="rounded-lg"
-    />
+      )}
     </div>
   );
 };
