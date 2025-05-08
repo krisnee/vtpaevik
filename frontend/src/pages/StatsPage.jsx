@@ -15,46 +15,58 @@ function StatsPage() {
   // Andmete laadimine API-st
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
         let result;
+        const today = new Date();
         
         if (activeTab === 'week') {
           // Viimase 7 päeva andmed
-          const endDate = new Date().toISOString().split('T')[0];
-          const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-          result = await journalService.getMoodTrends(startDate, endDate);
+          const weekAgo = new Date(today);
+          weekAgo.setDate(today.getDate() - 7);
+          result = await journalService.getJournalEntries(); // Küsime kõik sissekanded
+          // Filtreerime viimase 7 päeva sissekanded
+          result = result.filter(entry => {
+            const entryDate = new Date(entry.date);
+            return entryDate >= weekAgo && entryDate <= today;
+          });
         } else if (activeTab === 'month') {
-          // Praeguse kuu andmed
-          const now = new Date();
-          const year = now.getFullYear();
-          const month = now.getMonth() + 1;
-          result = await journalService.getMonthlyStats(year, month);
+          // Viimase kuu andmed
+          const monthAgo = new Date(today);
+          monthAgo.setMonth(today.getMonth() - 1);
+          result = await journalService.getJournalEntries(); // Küsime kõik sissekanded
+          // Filtreerime viimase kuu sissekanded
+          result = result.filter(entry => {
+            const entryDate = new Date(entry.date);
+            return entryDate >= monthAgo && entryDate <= today;
+          });
         } else {
-          // Praeguse aasta andmed
-          const year = new Date().getFullYear();
-          result = await journalService.getYearlyStats(year);
+          // Viimase aasta andmed
+          const yearAgo = new Date(today);
+          yearAgo.setFullYear(today.getFullYear() - 1);
+          result = await journalService.getJournalEntries(); // Küsime kõik sissekanded
+          // Filtreerime viimase aasta sissekanded
+          result = result.filter(entry => {
+            const entryDate = new Date(entry.date);
+            return entryDate >= yearAgo && entryDate <= today;
+          });
         }
         
-        // Teisendame andmed õigesse formaati
-        const formattedData = result.entries ? result.entries.map(entry => ({
-          date: entry.date,
-          mood: entry.mood_rating,
-          sleep: entry.sleep_quality,
-          activity: entry.activity_level || 5, // Kui puudub, kasutame vaikeväärtust
-          social: entry.social_interaction || 5 // Kui puudub, kasutame vaikeväärtust
-        })) : [];
-        
-        setData(formattedData);
-        setError(null);
+        if (result && Array.isArray(result)) {
+          setData(result);
+        } else if (result && result.entries) {
+          setData(result.entries);
+        } else {
+          setData([]);
+        }
       } catch (err) {
-        console.error('Viga andmete laadimisel:', err);
-        setError('Andmete laadimine ebaõnnestus. Palun proovige hiljem uuesti.');
+        console.error('Viga statistika laadimisel:', err);
+        setError('Statistika laadimine ebaõnnestus. Palun proovige hiljem uuesti.');
       } finally {
         setLoading(false);
       }
     };
-    
+  
     fetchData();
   }, [activeTab]);
 
