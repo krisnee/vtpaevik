@@ -1,12 +1,16 @@
-import { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 
+// Loome AuthContext'i
 const AuthContext = createContext();
 
+// Hook konteksti kasutamiseks teistes komponentides
+// NB! See peab olema defineeritud VÄLJASPOOL AuthProvider komponenti
 export const useAuth = () => {
   return useContext(AuthContext);
 };
 
+// AuthProvider komponent
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -70,17 +74,30 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, email, password) => {
     try {
+      console.log("Alustame registreerimist:", { username, email, password });
       setLoading(true);
       setError(null);
       
-      const response = await axios.post('/api/auth/register', {
+      // Seadistame axios'e baas-URL-i (muuda vastavalt oma serveri aadressile)
+      const baseURL = 'http://localhost:8080';
+      
+      console.log("Saadame päringu aadressile:", baseURL + '/api/auth/register');
+      
+      const response = await axios.post(baseURL + '/api/auth/register', {
         username,
         email,
         password
       });
       
+      console.log("Vastus serverilt:", response.data);
+      
+      // Siin võid ka tokeni ja kasutaja andmed salvestada, et kohe sisse logida
+      
       return true;
     } catch (err) {
+      console.error("Registreerimise viga:", err);
+      console.error("Vea andmed:", err.response?.data);
+      console.error("Vea staatus:", err.response?.status);
       setError(err.response?.data?.message || 'Registreerimine ebaõnnestus');
       return false;
     } finally {
@@ -93,6 +110,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // Väärtused, mida soovime konteksti kaudu jagada
   const value = {
     user,
     loading,
@@ -108,3 +126,6 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
+// Eksporteerime ka AuthContext'i, et saaksime seda otse React.useContext'iga kasutada
+export { AuthContext };
