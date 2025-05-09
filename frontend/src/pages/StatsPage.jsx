@@ -53,7 +53,20 @@ function StatsPage() {
         }
         
         if (result && Array.isArray(result)) {
-          setData(result);
+          // Veendume, et kõik vajalikud väljad on olemas ja pole NaN
+          const validatedData = result.map(entry => ({
+            ...entry,
+            mood_rating: entry.mood_rating || 0,
+            sleep_quality: entry.sleep_quality || 0,
+            social_interaction: entry.social_interaction || 0,
+            physical_activity: entry.physical_activity || 0,
+            date: entry.date || new Date().toISOString().split('T')[0]
+          }));
+          
+          // Sorteerime andmed kuupäeva järgi
+          validatedData.sort((a, b) => new Date(a.date) - new Date(b.date));
+          
+          setData(validatedData);
         } else if (result && result.entries) {
           setData(result.entries);
         } else {
@@ -91,7 +104,7 @@ function StatsPage() {
             type="button"
             className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
               activeTab === 'week'
-                ? 'bg-teal-600 text-white'
+                ? 'bg-primary text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
             onClick={() => handleTabChange('week')}
@@ -102,7 +115,7 @@ function StatsPage() {
             type="button"
             className={`px-4 py-2 text-sm font-medium ${
               activeTab === 'month'
-                ? 'bg-teal-600 text-white'
+                ? 'bg-primary text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
             onClick={() => handleTabChange('month')}
@@ -113,7 +126,7 @@ function StatsPage() {
             type="button"
             className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
               activeTab === 'year'
-                ? 'bg-teal-600 text-white'
+                ? 'bg-primary text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
             onClick={() => handleTabChange('year')}
@@ -130,7 +143,7 @@ function StatsPage() {
             type="button"
             className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
               activeChart === 'line'
-                ? 'bg-teal-600 text-white'
+                ? 'bg-primary text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
             onClick={() => handleChartChange('line')}
@@ -141,7 +154,7 @@ function StatsPage() {
             type="button"
             className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
               activeChart === 'bar'
-                ? 'bg-teal-600 text-white'
+                ? 'bg-primary text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
             onClick={() => handleChartChange('bar')}
@@ -153,7 +166,7 @@ function StatsPage() {
       
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
       ) : error ? (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
@@ -180,12 +193,12 @@ function StatsPage() {
           <SleepChart data={data} chartType={activeChart} title={`Une kvaliteet (${activeTab === 'week' ? 'nädal' : activeTab === 'month' ? 'kuu' : 'aasta'})`} />
           
           {/* Soovitused */}
-          <div className="bg-teal-50 rounded-lg shadow-md p-5">
+          <div className="bg-primary bg-opacity-10 rounded-lg shadow-md p-5 mt-8">
             <h2 className="text-xl font-medium text-gray-900 mb-4">Personaalsed soovitused</h2>
             <div className="space-y-4">
               <div className="bg-white p-4 rounded-md shadow-sm">
                 <div className="flex items-center mb-2">
-                  <svg className="w-5 h-5 text-teal-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   <h3 className="font-medium">Une kvaliteet</h3>
@@ -197,7 +210,7 @@ function StatsPage() {
               
               <div className="bg-white p-4 rounded-md shadow-sm">
                 <div className="flex items-center mb-2">
-                  <svg className="w-5 h-5 text-teal-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   <h3 className="font-medium">Järgmine samm</h3>
