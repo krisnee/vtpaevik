@@ -6,14 +6,14 @@ const App = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Navigation bar */}
-      <nav className="w-full px-4 py-3 shadow-md bg-teal-500">
+      <nav className="w-full px-4 py-3 shadow-md bg-primary">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <img 
               src="https://placehold.co/40x40" 
               alt="Placeholder"
-                  width="40px"
-                  height="40px"
+              width="40px"
+              height="40px"
               className="h-10 w-10 rounded-full"
             />
             <h1 className="text-xl font-semibold text-white">Vaimse Tervise Päevik</h1>
@@ -110,7 +110,7 @@ const HomePage = () => {
       id: 'add-entry',
       title: 'Lisa tänane sissekanne',
       description: 'Märgi üles oma tänane meeleolu ja tunne',
-      icon: <PlusCircle size={24} className="text-teal-500" />,
+      icon: <PlusCircle size={24} className="text-primary" />,
       action: openModal,
       primary: !isTodayEntered,
       disabled: isTodayEntered
@@ -126,7 +126,7 @@ const HomePage = () => {
       id: 'view-stats',
       title: 'Vaata statistikat',
       description: 'Näe oma meeleolu dünaamikat',
-      icon: <BarChart2 size={24} className="text-purple-500" />,
+      icon: <BarChart2 size={24} className="text-primary-dark" />,
       action: navigateToStats
     },
     {
@@ -157,7 +157,7 @@ const HomePage = () => {
             case 2: color = "bg-orange-400"; break;
             case 3: color = "bg-yellow-400"; break;
             case 4: color = "bg-green-400"; break;
-            case 5: color = "bg-green-600"; break;
+            case 5: color = "bg-primary"; break;
             default: color = "bg-gray-400";
           }
           
@@ -178,7 +178,7 @@ const HomePage = () => {
   return (
     <div className="container mx-auto p-4 max-w-6xl">
       {/* Greeting */}
-      <div className="bg-gradient-to-r from-teal-500 to-blue-500 text-white rounded-lg p-6 mb-6 shadow-md">
+      <div className="bg-gradient-to-r from-primary to-blue-500 text-white rounded-lg p-6 mb-6 shadow-md">
         <h1 className="text-2xl font-bold mb-2">Tere tulemast, Kasutaja!</h1>
         <p>
           {isTodayEntered
@@ -195,7 +195,7 @@ const HomePage = () => {
             className={`
               bg-white rounded-lg shadow-md p-4 transition cursor-pointer
               ${card.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg transform hover:-translate-y-1'}
-              ${card.primary ? 'ring-2 ring-teal-500' : ''}
+              ${card.primary ? 'ring-2 ring-primary' : ''}
             `}
             onClick={card.disabled ? undefined : card.action}
           >
@@ -205,7 +205,7 @@ const HomePage = () => {
             </div>
             <p className="text-gray-600">{card.description}</p>
             {card.disabled && (
-              <div className="mt-2 text-sm text-teal-600">
+              <div className="mt-2 text-sm text-primary">
                 Juba märgitud täna
               </div>
             )}
@@ -247,7 +247,7 @@ const HomePage = () => {
                       key={index}
                       type="button"
                       className={`flex flex-col items-center p-2 rounded-lg transition 
-                        ${selectedMood === index + 1 ? 'bg-teal-100 ring-2 ring-teal-500' : 'hover:bg-gray-100'}`}
+                        ${selectedMood === index + 1 ? 'bg-primary-light ring-2 ring-primary' : 'hover:bg-gray-100'}`}
                       onClick={() => setSelectedMood(index + 1)}
                     >
                       <span className="text-3xl mb-1">{emoji}</span>
