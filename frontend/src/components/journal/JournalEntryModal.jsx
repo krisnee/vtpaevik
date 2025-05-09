@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookHeart, Smile, Moon, Calendar, MessageCircle, X, Check } from 'lucide-react';
+import { BookHeart, Smile, Moon, Calendar, MessageCircle, X, Check, Activity } from 'lucide-react';
 import journalService from '../../services/journalService';
 
 const JournalComponent = () => {
@@ -12,6 +12,7 @@ const JournalComponent = () => {
     mood_rating: 3,
     sleep_quality: 3,
     social_interaction: 2,
+    physical_activity: 2,
     notes: ''
   });
 
@@ -37,6 +38,7 @@ const JournalComponent = () => {
       mood_rating: 3,
       sleep_quality: 3,
       social_interaction: 2,
+      physical_activity: 2,
       notes: ''
     });
     setIsModalOpen(true);
@@ -50,6 +52,7 @@ const JournalComponent = () => {
       mood_rating: entry.mood_rating,
       sleep_quality: entry.sleep_quality,
       social_interaction: entry.social_interaction || 2,
+      physical_activity: entry.physical_activity || 2,
       notes: entry.notes || ''
     });
     setIsModalOpen(true);
@@ -114,6 +117,12 @@ const JournalComponent = () => {
     return options[value] || "Normaalselt";
   };
 
+  // Aktiivsuse sõnaliselt väljendamine
+  const getActivityText = (value) => {
+    const options = ["Passiivne", "Vähe", "Mõõdukas", "Aktiivne", "Väga aktiivne"];
+    return options[value] || "Mõõdukas";
+  };
+
   // Kuupäeva formaatimine
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString('et-EE', {
@@ -129,13 +138,13 @@ const JournalComponent = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Päise osa koos "Lisa uus" nupuga */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-purple-800 flex items-center">
+          <h1 className="text-3xl font-bold text-primary-dark flex items-center">
             <BookHeart className="mr-2" />
             Minu päevik
           </h1>
           <button
             onClick={handleAddEntry}
-            className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
             Lisa uus sissekanne
           </button>
@@ -147,7 +156,7 @@ const JournalComponent = () => {
             entries.map((entry) => (
               <div
                 key={entry.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-purple-100"
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-primary-light/30"
               >
                 <div className="px-6 py-4">
                   <div className="flex justify-between items-center mb-2">
@@ -181,13 +190,20 @@ const JournalComponent = () => {
                         <span className="font-medium">{getSocialText(entry.social_interaction)}</span>
                       </div>
                     )}
+                    {entry.physical_activity !== undefined && (
+                      <div className="flex items-center">
+                        <Activity className="mr-1 text-red-500" />
+                        <span className="mr-1">Aktiivsus:</span>
+                        <span className="font-medium">{getActivityText(entry.physical_activity)}</span>
+                      </div>
+                    )}
                   </div>
                   <p className="text-gray-700">{entry.notes}</p>
                 </div>
                 <div className="bg-gray-50 px-6 py-3 flex justify-end">
                   <button
                     onClick={() => handleEditEntry(entry)}
-                    className="text-purple-600 hover:text-purple-800 text-sm font-medium"
+                    className="text-primary hover:text-primary-dark text-sm font-medium"
                   >
                     Muuda
                   </button>
@@ -207,7 +223,7 @@ const JournalComponent = () => {
       {/* Hõljuv "Lisa uus" nupp mobiilivaates */}
       <button
         onClick={handleAddEntry}
-        className="md:hidden fixed bottom-6 right-6 bg-purple-600 text-white rounded-full p-4 shadow-lg hover:bg-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+        className="md:hidden fixed bottom-6 right-6 bg-primary text-white rounded-full p-4 shadow-lg hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
       >
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -219,7 +235,7 @@ const JournalComponent = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-xl p-6 mx-4">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold text-purple-800 flex items-center">
+              <h2 className="text-2xl font-semibold text-primary-dark flex items-center">
                 <BookHeart className="mr-2" />
                 {selectedEntry ? 'Muuda sissekannet' : 'Tänane enesetunne'}
               </h2>
@@ -232,14 +248,14 @@ const JournalComponent = () => {
               {/* Kuupäev */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                  <Calendar className="mr-2 text-purple-500" /> Kuupäev
+                  <Calendar className="mr-2 text-primary" /> Kuupäev
                 </label>
                 <input
                   type="date"
                   name="date"
                   value={formData.date}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
                 />
               </div>
 
@@ -255,7 +271,7 @@ const JournalComponent = () => {
                         type="button"
                         key={value}
                         onClick={() => setFormData({...formData, mood_rating: value})}
-                        className={`text-3xl ${formData.mood_rating == value ? 'scale-125 border-2 border-purple-500 rounded-full p-1' : 'opacity-50'}`}
+                        className={`text-3xl ${formData.mood_rating == value ? 'scale-125 border-2 border-primary rounded-full p-1' : 'opacity-50'}`}
                       >
                         {getMoodEmoji(value)}
                       </button>
@@ -332,7 +348,7 @@ const JournalComponent = () => {
                   name="social_interaction"
                   value={formData.social_interaction}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded focus:ring-purple-500 focus:border-purple-500"
+                  className="w-full p-2 border rounded focus:ring-primary focus:border-primary"
                 >
                   <option value="0">Minimaalne</option>
                   <option value="1">Vähe</option>
@@ -342,10 +358,29 @@ const JournalComponent = () => {
                 </select>
               </div>
 
+              {/* Füüsiline aktiivsus */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  <Activity className="mr-2 text-red-500" /> Füüsiline aktiivsus
+                </label>
+                <select 
+                  name="physical_activity"
+                  value={formData.physical_activity}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded focus:ring-primary focus:border-primary"
+                >
+                  <option value="0">Passiivne</option>
+                  <option value="1">Vähe</option>
+                  <option value="2">Mõõdukas</option>
+                  <option value="3">Aktiivne</option>
+                  <option value="4">Väga aktiivne</option>
+                </select>
+              </div>
+
               {/* Märkmed */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                  <MessageCircle className="mr-2 text-purple-500" /> Mõtted ja tähelepanekud
+                  <MessageCircle className="mr-2 text-primary" /> Mõtted ja tähelepanekud
                 </label>
                 <textarea
                   name="notes"
@@ -353,7 +388,7 @@ const JournalComponent = () => {
                   onChange={handleChange}
                   rows="5"
                   placeholder="Kirjuta siia oma tänased mõtted, tunded või kogemused..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
                 ></textarea>
               </div>
 
@@ -362,13 +397,13 @@ const JournalComponent = () => {
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center"
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center"
                 >
                   <X className="mr-1 w-4 h-4" /> Tühista
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center"
+                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center"
                 >
                   <Check className="mr-1 w-4 h-4" /> Salvesta
                 </button>
