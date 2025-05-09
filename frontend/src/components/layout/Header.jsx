@@ -2,8 +2,7 @@
  * Header.jsx
  * 
  * Vaimse tervise päeviku rakenduse peamine navigatsioonipäis.
- * Võimaldab navigeerida rakenduse lehtede vahel, kasutajakonto haldamist
- * ja visuaalse teema muutmist.
+ * Võimaldab navigeerida rakenduse lehtede vahel ja kasutajakonto haldamist.
  * 
  * @version 1.0.0
  * @author [Kristi]
@@ -14,19 +13,18 @@ import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import AuthPopup from '../auth/AuthPopup';
 import { 
-  Home, Book, BarChart2, Heart, User, 
-  Menu, X, Moon, Sun, PhoneCall, Info
+  Home, Book, BarChart2, Heart, 
+  Menu, X, PhoneCall, Info, LayoutDashboard
 } from 'lucide-react';
 
 /**
  * Header komponent rakenduse ülaosa jaoks
- * Sisaldab navigatsiooni, kasutajaautentimist ja teemavahetust
+ * Sisaldab navigatsiooni ja kasutajaautentimist
  */
 const Header = () => {
   // --------- OLEKUD ---------
-  // Põhiolekud menüü ja teema jaoks
+  // Põhiolekud menüü jaoks
   const [isMenuOpen, setIsMenuOpen] = useState(false); // Mobiilimenüü avatud/suletud olek
-  const [isDarkMode, setIsDarkMode] = useState(false); // Tumeda/heleda režiimi olek
   
   // Autentimisega seotud olekud
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Kas kasutaja on sisse logitud
@@ -46,13 +44,6 @@ const Header = () => {
   }, []);
 
   // --------- FUNKTSIOONID ---------
-  // Tumeda/heleda režiimi lülitamine
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    // Siia võib lisada teema rakendamise loogika, nt:
-    // document.documentElement.classList.toggle('dark');
-  };
-
   // Menüü avamine/sulgemine (mobiilivaates)
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -93,10 +84,9 @@ const Header = () => {
     { id: 'home', path: '/', name: 'Avaleht', icon: <Home size={20} />, forAll: true },
     { id: 'journal', path: '/journal', name: 'Päevik', icon: <Book size={20} />, forAll: false },
     { id: 'stats', path: '/stats', name: 'Statistika', icon: <BarChart2 size={20} />, forAll: false },
+    { id: 'dashboard', path: '/dashboard', name: 'Minu profiil', icon: <LayoutDashboard size={20} />, forAll: false },
     // Alammenüü "Rohkem" sees
     { id: 'tips', path: '/tips', name: 'Nipid ja harjutused', icon: <Heart size={20} />, forAll: true },
-    { id: 'settings', path: '/settings', name: 'Seaded', icon: <User size={20} />, forAll: false },
-    { id: 'profile', path: '/profile', name: 'Profiil', icon: <User size={20} />, forAll: false },
     { id: 'contact', path: '/contact', name: 'Kontakt / Abi', icon: <PhoneCall size={20} />, forAll: true },
     { id: 'about', path: '/about', name: 'Meist', icon: <Info size={20} />, forAll: true },
   ];
@@ -107,7 +97,7 @@ const Header = () => {
   // Peamenüüs näidatavad elemendid
   const mainMenuItems = [
     menuItems[0], // Avaleht
-    ...(isAuthenticated ? [menuItems[1], menuItems[2]] : []) // Päevik ja Statistika ainult sisseloginud kasutajatele
+    ...(isAuthenticated ? [menuItems[1], menuItems[2], menuItems[3]] : []) // Päevik, Statistika ja Minu profiil ainult sisseloginud kasutajatele
   ];
   
   // "Rohkem" alammenüüs näidatavad elemendid
@@ -160,7 +150,7 @@ const Header = () => {
                       to={item.path}
                       className={({ isActive }) => 
                         `block px-4 py-2 flex items-center ${
-                          isActive ? 'bg-teal-100 text-teal-800' : 'text-gray-700 hover:bg-gray-100'
+                          isActive ? 'bg-primary-light text-primary-dark' : 'text-gray-700 hover:bg-gray-100'
                         }`
                       }
                     >
@@ -168,61 +158,37 @@ const Header = () => {
                       <span>{item.name}</span>
                     </NavLink>
                   ))}
+                  
+                  {/* Logi välja nupp - nähtav ainult sisselogitud kasutajatele */}
+                  {isAuthenticated && (
+                    <button 
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 border-t border-gray-200"
+                    >
+                      Logi välja
+                    </button>
+                  )}
                 </div>
               </div>
             )}
 
-            {/* Autentimine ja teema lüliti */}
-            <div className="flex items-center ml-4">
-              {/* Tume/hele režiimi lüliti */}
-              <button 
-                onClick={toggleDarkMode} 
-                className="p-2 rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition duration-200 mr-3"
-                aria-label={isDarkMode ? "Lülitu heledasse režiimi" : "Lülitu tumedasse režiimi"}
-              >
-                {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
-
-              {/* Autentimise nupud - erinevad sisselogitud/väljalogitud oleku järgi */}
-              {isAuthenticated ? (
-                <div className="relative group">
-                  <button className="flex items-center text-white hover:bg-primary-dark hover:bg-opacity-70 rounded-md px-3 py-2">
-                    <User size={20} className="mr-1" />
-                    <span>Kasutaja</span>
-                  </button>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden group-hover:block z-10">
-                    <Link 
-                      to="/profile" 
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center"
-                    >
-                      <User size={20} className="mr-2" />
-                      <span>Profiil</span>
-                    </Link>
-                    <button 
-                      onClick={handleLogout} 
-                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center"
-                    >
-                      <span>Logi välja</span>
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center">
-                  <button 
-                    onClick={openLoginModal} 
-                    className="text-white hover:bg-primary-dark hover:bg-opacity-70 rounded-md px-3 py-2"
-                  >
-                    Logi sisse
-                  </button>
-                  <button 
-                    onClick={openRegisterModal} 
-                    className="ml-2 text-white bg-primary-dark hover:bg-opacity-90 rounded-md px-3 py-2"
-                  >
-                    Registreeru
-                  </button>
-                </div>
-              )}
-            </div>
+            {/* Autentimise nupud - ainult väljalogitud kasutajatele */}
+            {!isAuthenticated && (
+              <div className="flex items-center">
+                <button 
+                  onClick={openLoginModal} 
+                  className="text-white hover:bg-primary-dark hover:bg-opacity-70 rounded-md px-3 py-2"
+                >
+                  Logi sisse
+                </button>
+                <button 
+                  onClick={openRegisterModal} 
+                  className="ml-2 text-white bg-primary-dark hover:bg-opacity-90 rounded-md px-3 py-2"
+                >
+                  Registreeru
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Mobiilimenüü nupp - kuvatud ainult väiksematel ekraanidel */}
@@ -285,17 +251,6 @@ const Header = () => {
                 <span>Logi välja</span>
               </button>
             )}
-
-            {/* Tume/hele režiimi lüliti */}
-            <button 
-              onClick={toggleDarkMode} 
-              className="block w-full text-left px-3 py-2 text-white hover:bg-primary-dark hover:bg-opacity-70 rounded-md flex items-center"
-            >
-              <span className="mr-2">
-                {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-              </span>
-              <span>{isDarkMode ? 'Hele režiim' : 'Tume režiim'}</span>
-            </button>
           </div>
         </div>
       )}
@@ -311,22 +266,22 @@ const Header = () => {
         />
       )}
  
-    {/* Registreerimise modaal */}
-    {isRegisterModalOpen && (
-      <AuthPopup 
-        isLoginOpen={false} 
-        isRegisterOpen={true} 
-        onClose={closeModals} 
-        onSwitchToRegister={() => {
-          setIsLoginModalOpen(false);
-          setIsRegisterModalOpen(true);
-        }} 
-        onSwitchToLogin={() => {
-          setIsRegisterModalOpen(false);
-          setIsLoginModalOpen(true);
-        }} 
-      />
-    )}
+      {/* Registreerimise modaal */}
+      {isRegisterModalOpen && (
+        <AuthPopup 
+          isLoginOpen={false} 
+          isRegisterOpen={true} 
+          onClose={closeModals} 
+          onSwitchToRegister={() => {
+            setIsLoginModalOpen(false);
+            setIsRegisterModalOpen(true);
+          }} 
+          onSwitchToLogin={() => {
+            setIsRegisterModalOpen(false);
+            setIsLoginModalOpen(true);
+          }} 
+        />
+      )}
     </header>
   );
 };
